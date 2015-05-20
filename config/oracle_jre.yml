@@ -21,7 +21,7 @@
 
 jre:
   version: 1.8.0_+
-  repository_root: ""
+  repository_root: "https://pivotalservices.artifactoryonline.com/pivotalservices/simple/ext-releases-local/oracle-jdk/linux_x64/1.8.0_45/"
 memory_calculator:
   version: 1.+
   repository_root: "{default.repository.root}/memory-calculator/{platform}/{architecture}"
