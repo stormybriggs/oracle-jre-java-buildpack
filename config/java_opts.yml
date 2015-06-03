@@ -16,4 +16,4 @@
 # JAVA_OPTS configuration
 ---
 from_environment: true
-java_opts: -verbose:gc
+java_opts: -verbose:gc -XX:+PrintGCDateStamps -XX:+PrintGCDetails
