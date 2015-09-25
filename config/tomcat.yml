@@ -16,8 +16,8 @@
 # Configuration for the Tomcat container
 ---
 tomcat:
-  version: 8.0.+
-  repository_root: ! '{default.repository.root}/tomcat'
+  version: 7.0.+
+  repository_root: "https://emcconsulting.artifactoryonline.com/emcconsulting/ext-releases-local/apache-tomcat/"
   context_path:
 lifecycle_support:
   version: 2.+
