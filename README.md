@@ -10,7 +10,7 @@ The `java-buildpack` is a [Cloud Foundry][] buildpack for running JVM-based appl
 To use this buildpack specify the URI of the repository when pushing an application to Cloud Foundry:
 
 ```bash
-cf push <APP-NAME> -p <ARTIFACT> -b https://github.com/cloudfoundry/java-buildpack.git
+$ cf push <APP-NAME> -p <ARTIFACT> -b https://github.com/cloudfoundry/java-buildpack.git
 ```
 
 ## Examples
@@ -27,15 +27,33 @@ The following are _very_ simple examples for deploying the artifact types that w
 ## Configuration and Extension
 The buildpack supports extension through the use of Git repository forking. The easiest way to accomplish this is to use [GitHub's forking functionality][] to create a copy of this repository.  Make the required extension changes in the copy of the repository. Then specify the URL of the new repository when pushing Cloud Foundry applications. If the modifications are generally applicable to the Cloud Foundry community, please submit a [pull request][] with the changes.
 
-Buildpack configuration can be overridden with an environment variable matching the configuration file you wish to override minus the `.yml` extension and with a prefix of `JBP_CONFIG`. The value of the variable should be valid inline yaml. For example, to change the default version of Java to 7 and adjust the memory heuristics apply this environment variable to the application.
+Buildpack configuration can be overridden with an environment variable matching the configuration file you wish to override minus the `.yml` extension and with a prefix of `JBP_CONFIG`. It is not possible to add new configuration properties and properties with `nil` or empty values will be ignored by the buildpack. The value of the variable should be valid inline yaml, referred to as `flow style` in the yaml spec. For example, to change the default version of Java to 7 and adjust the memory heuristics apply this environment variable to the application.
 
-```cf set-env my-application JBP_CONFIG_OPEN_JDK_JRE '[version: 1.7.0_+, memory_heuristics: {heap: 85, stack: 10}]'```
+```bash
+$ cf set-env my-application JBP_CONFIG_OPEN_JDK_JRE '[jre: { version: 1.7.0_+ }]'
+```
 
 If the key or value contains a special character such as `:` it should be escaped with double quotes. For example, to change the default repository path for the buildpack.
 
-```cf set-env my-application JBP_CONFIG_REPOSITORY '[ default_repository_root: "http://repo.example.io" ]'```
+```bash
+$ cf set-env my-application JBP_CONFIG_REPOSITORY '[default_repository_root: "http://repo.example.io"]'
+```
 
-Environment variable can also be specified in the applications `manifest` file. See the [Environment Variables][] documentation for more information.
+Environment variable can also be specified in the applications `manifest` file. For example, to specify an environment variable in an applications manifest file that disables Auto-reconfiguration.
+
+```bash
+  env: 
+    JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '[enabled: false]'
+```
+
+This final example shows how to change the version of Tomcat that is used by the buildpack with an environment variable specified in the applications manifest file.
+
+```bash
+  env: 
+    JBP_CONFIG_TOMCAT: '[tomcat: { version: 8.0.+ }]'
+```
+
+See the [Environment Variables][] documentation for more information.
 
 To learn how to configure various properties of the buildpack, follow the "Configuration" links below. More information on extending the buildpack is available [here](docs/extending.md).
 
@@ -57,6 +75,7 @@ To learn how to configure various properties of the buildpack, follow the "Confi
 	* [DynaTrace Agent](docs/framework-dyna_trace_agent.md) ([Configuration](docs/framework-dyna_trace_agent.md#configuration))
 	* [Java Options](docs/framework-java_opts.md) ([Configuration](docs/framework-java_opts.md#configuration))
 	* [JRebel Agent](docs/framework-jrebel_agent.md) ([Configuration](docs/framework-jrebel_agent.md#configuration))
+	* [Luna Security Provider](docs/framework-luna_security_provider.md) ([Configuration](docs/framework-luna_security_provider.md#configuration))
 	* [MariaDB JDBC](docs/framework-maria_db_jdbc.md) ([Configuration](docs/framework-maria_db_jdbc.md#configuration))
 	* [New Relic Agent](docs/framework-new_relic_agent.md) ([Configuration](docs/framework-new_relic_agent.md#configuration))
 	* [Play Framework Auto Reconfiguration](docs/framework-play_framework_auto_reconfiguration.md) ([Configuration](docs/framework-play_framework_auto_reconfiguration.md#configuration))
@@ -91,8 +110,8 @@ The buildpack can be packaged up so that it can be uploaded to Cloud Foundry usi
 The online package is a version of the buildpack that is as minimal as possible and is configured to connect to the network for all dependencies.  This package is about 50K in size.  To create the online package, run:
 
 ```bash
-bundle install
-bundle exec rake package
+$ bundle install
+$ bundle exec rake package
 ...
 Creating build/java-buildpack-cfd6b17.zip
 ```
@@ -100,9 +119,11 @@ Creating build/java-buildpack-cfd6b17.zip
 ### Offline Package
 The offline package is a version of the buildpack designed to run without access to a network.  It packages the latest version of each dependency (as configured in the [`config/` directory][]) and [disables `remote_downloads`][]. This package is about 180M in size.  To create the offline package, use the `OFFLINE=true` argument:
 
+To pin the version of dependencies used by the buildpack to the ones currently resolvable use the `PINNED=true` argument. This will update the [`config/` directory][] to contain exact version of each dependency instead of version ranges.
+
 ```bash
-bundle install
-bundle exec rake package OFFLINE=true
+$ bundle install
+$ bundle exec rake package OFFLINE=true PINNED=true
 ...
 Creating build/java-buildpack-offline-cfd6b17.zip
 ```
@@ -111,8 +132,8 @@ Creating build/java-buildpack-offline-cfd6b17.zip
 Keeping track of different versions of the buildpack can be difficult.  To help with this, the rake `package` task puts a version discriminator in the name of the created package file.  The default value for this discriminator is the current Git hash (e.g. `cfd6b17`).  To change the version when creating a package, use the `VERSION=<VERSION>` argument:
 
 ```bash
-bundle install
-bundle exec rake package VERSION=2.1
+$ bundle install
+$ bundle exec rake package VERSION=2.1
 ...
 Creating build/java-buildpack-2.1.zip
 ```
@@ -121,8 +142,8 @@ Creating build/java-buildpack-2.1.zip
 To run the tests, do the following:
 
 ```bash
-bundle install
-bundle exec rake
+$ bundle install
+$ bundle exec rake
 ```
 
 [Running Cloud Foundry locally][] is useful for privately testing new features.
